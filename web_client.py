@@ -391,7 +391,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # =====================================================================
-# 👻 PIXELATED GHOST HEADER
+# 👻 PIXELATED ASSETS & ANIMATIONS
 # =====================================================================
 GHOST_SVG = """
 <svg xmlns="http://www.w3.org/2000/svg" width="54" height="54" viewBox="0 0 20 20" shape-rendering="crispEdges">
@@ -399,34 +399,81 @@ GHOST_SVG = """
   <rect x="4" y="3" width="12" height="1" fill="#F3E8FF"/>
   <rect x="3" y="4" width="14" height="2" fill="#F3E8FF"/>
   <rect x="2" y="6" width="16" height="8" fill="#F3E8FF"/>
-  
   <rect x="2" y="14" width="3" height="2" fill="#F3E8FF"/>
   <rect x="6" y="14" width="3" height="2" fill="#F3E8FF"/>
   <rect x="11" y="14" width="3" height="2" fill="#F3E8FF"/>
   <rect x="15" y="14" width="3" height="2" fill="#F3E8FF"/>
-  
-  <rect x="2" y="16" width="2" height="1" fill="#F3E8FF"/>
-  <rect x="7" y="16" width="2" height="1" fill="#F3E8FF"/>
-  <rect x="12" y="16" width="2" height="1" fill="#F3E8FF"/>
-  <rect x="16" y="16" width="2" height="1" fill="#F3E8FF"/>
-
   <rect x="5" y="7" width="2" height="3" fill="#1E1B4B"/>
   <rect x="13" y="7" width="2" height="3" fill="#1E1B4B"/>
-  <rect x="5" y="7" width="1" height="1" fill="#FFFFFF"/>
-  <rect x="13" y="7" width="1" height="1" fill="#FFFFFF"/>
-
   <rect x="4" y="10" width="2" height="1" fill="#F472B6"/>
   <rect x="14" y="10" width="2" height="1" fill="#F472B6"/>
-
-  <rect x="1" y="3" width="1" height="1" fill="#A855F7"/>
-  <rect x="0" y="4" width="3" height="1" fill="#A855F7"/>
-  <rect x="1" y="5" width="1" height="1" fill="#A855F7"/>
-
-  <rect x="18" y="10" width="1" height="1" fill="#C084FC"/>
-  <rect x="17" y="11" width="3" height="1" fill="#C084FC"/>
-  <rect x="18" y="12" width="1" height="1" fill="#C084FC"/>
 </svg>
 """
+
+# A happy ghost holding up a pixelated thumb!
+GHOST_THUMBS_UP_SVG = """
+<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 20" shape-rendering="crispEdges">
+  <rect x="6" y="2" width="8" height="1" fill="#A855F7"/>
+  <rect x="4" y="3" width="12" height="1" fill="#A855F7"/>
+  <rect x="3" y="4" width="14" height="2" fill="#A855F7"/>
+  <rect x="2" y="6" width="16" height="8" fill="#A855F7"/>
+  <rect x="2" y="14" width="3" height="2" fill="#A855F7"/>
+  <rect x="6" y="14" width="3" height="2" fill="#A855F7"/>
+  <rect x="11" y="14" width="3" height="2" fill="#A855F7"/>
+  <rect x="15" y="14" width="3" height="2" fill="#A855F7"/>
+  <rect x="5" y="7" width="2" height="3" fill="#1E1B4B"/>
+  <rect x="13" y="7" width="2" height="3" fill="#1E1B4B"/>
+  <!-- Thumbs up arm -->
+  <rect x="18" y="9" width="3" height="2" fill="#A855F7"/>
+  <rect x="20" y="7" width="2" height="2" fill="#A855F7"/>
+</svg>
+"""
+
+# A sleek purple pixelated paper plane
+PAPER_PLANE_SVG = """
+<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 20 20" shape-rendering="crispEdges">
+  <rect x="2" y="10" width="16" height="2" fill="#A855F7"/>
+  <rect x="6" y="8" width="12" height="2" fill="#A855F7"/>
+  <rect x="10" y="6" width="8" height="2" fill="#A855F7"/>
+  <rect x="14" y="4" width="4" height="2" fill="#A855F7"/>
+  <rect x="6" y="12" width="6" height="2" fill="#C084FC"/>
+  <rect x="6" y="14" width="2" height="2" fill="#C084FC"/>
+</svg>
+"""
+
+# The CSS keyframes that make the plane fly away
+ANIMATION_CSS = """
+<style>
+@keyframes flyAway {
+  0% { transform: translate(0px, 0px) scale(1); opacity: 1; }
+  20% { transform: translate(-10px, 10px) scale(1); opacity: 1; }
+  100% { transform: translate(250px, -200px) scale(0.5); opacity: 0; }
+}
+.plane-container {
+  animation: flyAway 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+.success-container {
+  animation: fadeIn 0.5s ease-in;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  background: rgba(168, 85, 247, 0.1);
+  border: 1px solid #A855F7;
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 10px;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>
+"""
+st.markdown(ANIMATION_CSS, unsafe_allow_html=True)
 
 st.markdown(f"""
 <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px;">
@@ -505,35 +552,54 @@ with tab_send:
                 if cover_file:
                     st.image(cover_file, caption="Cover asset preview", use_container_width=True)
 
-                send_ready = cover_file and secret_message and secret_message.strip()
-
-                if st.button(
-                    "Hide Message & Transmit",
-                    type="primary",
-                    disabled=not send_ready,
-                    use_container_width=True,
-                ):
-                    with st.spinner("Encrypting & hiding payload..."):
-                        eph_priv      = x25519.X25519PrivateKey.generate()
-                        eph_pub       = eph_priv.public_key()
-                        eph_pub_bytes = eph_pub.public_bytes(Encoding.Raw, PublicFormat.Raw)
-
-                        shared        = eph_priv.exchange(rcpt_pub_key)
-                        aes_key       = derive_aes_key(shared)
-                        enc_msg       = Fernet(aes_key).encrypt(secret_message.encode())
-                        payload       = eph_pub_bytes + enc_msg
-
-                        stego_buf     = robust_embed(Image.open(cover_file), payload, target)
-                        requests.post(
-                            f"{SERVER_URL}/deposit/{target}",
-                            files={"file": ("payload.png", stego_buf, "image/png")},
-                            timeout=10,
+                if st.button("Hide Message & Transmit", type="primary", use_container_width=True):
+                    
+                    # 1. Validation Checks
+                    if not cover_file:
+                        st.error("Oops! Please attach a cover image to hide your message inside.", icon="🖼️")
+                    elif not secret_message or not secret_message.strip():
+                        st.error("Oops! Please type a secret payload to transmit.", icon="✍️")
+                    else:
+                        # 2. Animation Container
+                        anim_placeholder = st.empty()
+                        
+                        # Show flying plane
+                        anim_placeholder.markdown(
+                            f"<div class='plane-container'>{PAPER_PLANE_SVG}</div>", 
+                            unsafe_allow_html=True
                         )
 
-                    st.success("Payload successfully transmitted into blind token mailbox.")
+                        # 3. Process Crypto & Transmit
+                        with st.spinner("Encrypting & hiding payload..."):
+                            eph_priv      = x25519.X25519PrivateKey.generate()
+                            eph_pub       = eph_priv.public_key()
+                            eph_pub_bytes = eph_pub.public_bytes(Encoding.Raw, PublicFormat.Raw)
 
+                            shared        = eph_priv.exchange(rcpt_pub_key)
+                            aes_key       = derive_aes_key(shared)
+                            enc_msg       = Fernet(aes_key).encrypt(secret_message.encode())
+                            payload       = eph_pub_bytes + enc_msg
+
+                            stego_buf     = robust_embed(Image.open(cover_file), payload, target)
+                            requests.post(
+                                f"{SERVER_URL}/deposit/{target}",
+                                files={"file": ("payload.png", stego_buf, "image/png")},
+                                timeout=10,
+                            )
+
+                            anim_placeholder.markdown(
+                            f"""
+                            <div class="success-container">
+                                {GHOST_THUMBS_UP_SVG}
+                                <span style='color:#E4E4E7; font-family:"JetBrains Mono", monospace; font-weight:700;'>
+                                    PAYLOAD SUCCESSFULLY TRANSMITTED!
+                                </span>
+                            </div>
+                            """, 
+                            unsafe_allow_html=True
+                            )
         except Exception as e:
-            st.error(f"Recipient routing error: {e}")
+            st.error(f"Recipient routing error: {e}")                    
 
 # ─────────────────────────────────────────────
 # TAB: RECEIVE
