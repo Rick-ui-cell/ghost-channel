@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+streamlit
+pillow
+cryptography
+reedsolo
+requests
+python-multipart
