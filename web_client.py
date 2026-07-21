@@ -18,7 +18,7 @@ from cryptography.fernet import Fernet
 # =====================================================================
 # ⚙️ CONFIGURATION
 # =====================================================================
-SERVER_URL   = "http://127.0.0.1:8000"
+SERVER_URL = "https://ghost-channel-tteh.onrender.com"
 APP_URL      = "http://localhost:8501"
 DELIMITER    = b"##END_PAYLOAD##"
 CONSTANT_DIM = (1200, 1200)
