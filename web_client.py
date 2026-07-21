@@ -19,7 +19,7 @@ from cryptography.fernet import Fernet
 # ⚙️ CONFIGURATION
 # =====================================================================
 SERVER_URL = "https://ghost-channel-tteh.onrender.com"
-APP_URL      = "http://localhost:8501"
+APP_URL = "https://ghost-channel.streamlit.app"
 DELIMITER    = b"##END_PAYLOAD##"
 CONSTANT_DIM = (1200, 1200)
 rs           = RSCodec(100)
