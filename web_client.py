@@ -14,17 +14,56 @@ from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat,
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from cryptography.hazmat.primitives import hashes
 from cryptography.fernet import Fernet
+import streamlit as st
+import requests
+import hashlib
+from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives import serialization
 
-# =====================================================================
-# ⚙️ CONFIGURATION
-# =====================================================================
+# ==============================================================================
+# ⚙️ CONFIGURATION (Must be defined BEFORE session state setup!)
+# ==============================================================================
 SERVER_URL = "https://ghost-channel-tteh.onrender.com"
-APP_URL = "https://ghost-channel.streamlit.app"
-DELIMITER    = b"##END_PAYLOAD##"
+APP_URL    = "https://ghost-channel.streamlit.app"
+DELIMITER  = b"##END_PAYLOAD##"
 CONSTANT_DIM = (1200, 1200)
-rs           = RSCodec(100)
+rs         = RSCodec(100)
 
 st.set_page_config(page_title="Ghost Channel", page_icon="👻", layout="centered")
+
+
+# ==============================================================================
+# 🔑 SESSION-ISOLATED IDENTITY (Unique per user / browser tab)
+# ==============================================================================
+if "private_key" not in st.session_state or "token" not in st.session_state:
+    # 1. Generate a fresh ECC private key for this user tab
+    priv_key = ec.generate_private_key(ec.SECP256R1())
+    pub_key = priv_key.public_key()
+
+    # 2. Serialize public key
+    pub_pem = pub_key.public_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PublicFormat.SubjectPublicKeyInfo
+    ).decode('utf-8')
+
+    # 3. Derive 32-character unique token
+    token = hashlib.sha256(pub_pem.encode()).hexdigest()[:32]
+
+    # 4. Register token & public key with Render backend
+    try:
+        requests.post(f"{SERVER_URL}/register", json={"token": token, "pub_key": pub_pem})
+    except Exception as e:
+        st.sidebar.error(f"Backend registration failed: {e}")
+
+    # 5. Save in session memory (isolated per browser session)
+    st.session_state["private_key"] = priv_key
+    st.session_state["public_key"] = pub_key
+    st.session_state["pub_pem"] = pub_pem
+    st.session_state["token"] = token
+
+# Access active identity anywhere in your script:
+user_token = st.session_state["token"]
+user_priv_key = st.session_state["private_key"]
 
 # Cleanup legacy ML-KEM keys
 for old_file in ["bob.priv", "bob.pub"]:
