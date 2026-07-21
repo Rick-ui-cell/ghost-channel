@@ -448,7 +448,7 @@ hr { border-color: #1C1C2A !important; margin: 1.6rem 0 !important; }
 # =====================================================================
 # 👻  PIXEL ART ASSETS
 # =====================================================================
-GHOST_SVG = """<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 20 20" shape-rendering="crispEdges">
+GHOST_SVG = """<svg xmlns="http://www.w3.org/2000/svg" width="54" height="54" viewBox="0 0 20 20" shape-rendering="crispEdges">
   <rect x="6" y="2"  width="8"  height="1" fill="#F3E8FF"/>
   <rect x="4" y="3"  width="12" height="1" fill="#F3E8FF"/>
   <rect x="3" y="4"  width="14" height="2" fill="#F3E8FF"/>
@@ -459,7 +459,8 @@ GHOST_SVG = """<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" vi
   <rect x="15" y="14" width="3" height="2" fill="#F3E8FF"/>
   <rect x="5" y="7"  width="2"  height="3" fill="#1E1B4B"/>
   <rect x="13" y="7" width="2"  height="3" fill="#1E1B4B"/>
-  <rect x="8" y="10" width="4"  height="1" fill="#1E1B4B"/>
+  <rect x="4" y="10" width="2"  height="1" fill="#F472B6"/>
+  <rect x="14" y="10" width="2" height="1" fill="#F472B6"/>
 </svg>"""
 
 GHOST_WIN_SVG = """<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 20 20" shape-rendering="crispEdges">
@@ -500,10 +501,6 @@ st.markdown(f"""
                 letter-spacing:.1em;margin-top:3px;">
       STEGANOGRAPHIC · E2E ENCRYPTED · ZERO IDENTITY
     </div>
-  </div>
-  <div style="margin-left:auto;display:flex;align-items:center;gap:6px;">
-    <span class="pulse-dot"></span>
-    <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#52525B;">ONLINE</span>
   </div>
 </div>
 <div style="height:1px;background:linear-gradient(90deg,#2A1F3D,transparent);margin-bottom:1.6rem;"></div>
@@ -564,16 +561,6 @@ with tab_send:
                     f"font-weight:700;color:#A855F7;letter-spacing:3px;'>{chunk}</div>",
                     unsafe_allow_html=True,
                 )
-
-            st.markdown(
-                f"<div style='font-size:12px;color:#52525B;font-family:\"JetBrains Mono\",monospace;"
-                f"margin-top:10px;text-align:center;'>"
-                f"call or meet the recipient — ask: "
-                f"<em style='color:#71717A;'>\"does your number start with "
-                f"<strong style='color:#C084FC;'>{digits[0]} {digits[1]}</strong>?\"</em>"
-                f"</div>",
-                unsafe_allow_html=True,
-            )
 
             st.markdown("<div style='height:10px;'></div>", unsafe_allow_html=True)
 
@@ -649,11 +636,15 @@ with tab_send:
                         unsafe_allow_html=True,
                     )
 
-        except Exception as e:
+        except Exception:
             st.markdown(
-                f"<div style='background:rgba(239,68,68,.08);border:1px solid #7F1D1D;"
-                f"border-radius:10px;padding:12px 14px;font-size:12px;color:#FCA5A5;"
-                f"font-family:\"JetBrains Mono\",monospace;'>✗ {e}</div>",
+                "<div style='background:rgba(239,68,68,.08);border:1px solid #7F1D1D;"
+                "border-radius:10px;padding:14px 16px;font-family:\"JetBrains Mono\",monospace;'>"
+                "<div style='font-size:13px;color:#EF4444;font-weight:700;margin-bottom:4px;'>"
+                "Token Expired</div>"
+                "<div style='font-size:12px;color:#7F1D1D;'>"
+                "This token is no longer valid. Ask the recipient for a fresh one.</div>"
+                "</div>",
                 unsafe_allow_html=True,
             )
 
@@ -708,22 +699,13 @@ with tab_recv:
 
         for i, item in enumerate(st.session_state.inbox):
 
-            # Status pill
-            if item["cleartext"]:
-                pill = "<span class='gc-pill' style='background:rgba(34,197,94,.1);color:#4ADE80;border:1px solid #14532D;'>● decrypted</span>"
-            elif item["destroyed"]:
-                pill = "<span class='gc-pill' style='background:rgba(239,68,68,.1);color:#F87171;border:1px solid #7F1D1D;'>✗ destroyed</span>"
-            else:
-                pill = "<span class='gc-pill' style='background:rgba(168,85,247,.1);color:#C084FC;border:1px solid #2A1F3D;'>○ locked</span>"
-
-            # Card header
+            # Card header — no pills, just message number
             st.markdown(
                 f"<div class='gc-card'>"
-                f"<div style='display:flex;align-items:center;justify-content:space-between;"
-                f"margin-bottom:14px;'>"
+                f"<div style='margin-bottom:14px;'>"
                 f"<span style='font-family:\"JetBrains Mono\",monospace;font-size:10px;"
                 f"color:#3F3F46;letter-spacing:.1em;text-transform:uppercase;'>"
-                f"message #{i+1}</span>{pill}</div>",
+                f"message #{i+1}</span></div>",
                 unsafe_allow_html=True,
             )
 
