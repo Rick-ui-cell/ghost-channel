@@ -1,4 +1,3 @@
-import os
 import io
 import base64
 import hashlib
@@ -10,18 +9,13 @@ from PIL import Image
 from reedsolo import RSCodec
 
 from cryptography.hazmat.primitives.asymmetric import x25519
-from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat, PrivateFormat, NoEncryption
+from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from cryptography.hazmat.primitives import hashes
 from cryptography.fernet import Fernet
-import streamlit as st
-import requests
-import hashlib
-from cryptography.hazmat.primitives.asymmetric import ec
-from cryptography.hazmat.primitives import serialization
 
 # ==============================================================================
-# ⚙️ CONFIGURATION (Must be defined BEFORE session state setup!)
+# ⚙️ CONFIGURATION
 # ==============================================================================
 SERVER_URL = "https://ghost-channel-tteh.onrender.com"
 APP_URL    = "https://ghost-channel.streamlit.app"
@@ -31,48 +25,39 @@ rs         = RSCodec(100)
 
 st.set_page_config(page_title="Ghost Channel", page_icon="👻", layout="centered")
 
-
 # ==============================================================================
 # 🔑 SESSION-ISOLATED IDENTITY (Unique per user / browser tab)
 # ==============================================================================
 if "private_key" not in st.session_state or "token" not in st.session_state:
-    # 1. Generate a fresh ECC private key for this user tab
-    priv_key = ec.generate_private_key(ec.SECP256R1())
-    pub_key = priv_key.public_key()
+    # 1. Generate a fresh x25519 private key for this user tab
+    priv_key = x25519.X25519PrivateKey.generate()
+    pub_key  = priv_key.public_key()
 
-    # 2. Serialize public key
-    pub_pem = pub_key.public_bytes(
-        encoding=serialization.Encoding.PEM,
-        format=serialization.PublicFormat.SubjectPublicKeyInfo
-    ).decode('utf-8')
-
-    # 3. Derive 32-character unique token
-    token = hashlib.sha256(pub_pem.encode()).hexdigest()[:32]
+    # 2. Extract raw bytes for backend API and safety number computation
+    pub_bytes = pub_key.public_bytes(Encoding.Raw, PublicFormat.Raw)
+    
+    # 3. Generate a 32-character secure token
+    token = secrets.token_hex(16)
 
     # 4. Register token & public key with Render backend
     try:
-        requests.post(f"{SERVER_URL}/register", json={"token": token, "pub_key": pub_pem})
+        requests.post(
+            f"{SERVER_URL}/register/{token}",
+            json={"public_key_hex": pub_bytes.hex()},
+            timeout=3,
+        )
     except Exception as e:
         st.sidebar.error(f"Backend registration failed: {e}")
 
-    # 5. Save in session memory (isolated per browser session)
+    # 5. Save identity strictly in memory (isolated per browser session)
     st.session_state["private_key"] = priv_key
-    st.session_state["public_key"] = pub_key
-    st.session_state["pub_pem"] = pub_pem
-    st.session_state["token"] = token
+    st.session_state["pub_bytes"]   = pub_bytes
+    st.session_state["token"]       = token
 
 # Access active identity anywhere in your script:
-user_token = st.session_state["token"]
-user_priv_key = st.session_state["private_key"]
-
-# Cleanup legacy ML-KEM keys
-for old_file in ["bob.priv", "bob.pub"]:
-    if os.path.exists(old_file):
-        try:
-            if os.path.getsize(old_file) > 200:
-                os.remove(old_file)
-        except Exception:
-            pass
+user_token     = st.session_state["token"]
+user_priv_key  = st.session_state["private_key"]
+user_pub_bytes = st.session_state["pub_bytes"]
 
 # =====================================================================
 # 🔐 CRYPTO ENGINE
@@ -268,52 +253,6 @@ def qr_for_token(token: str, app_url: str) -> str:
     return _qr_svg(data, px=5)
 
 # =====================================================================
-# 🔑 LOCAL CREDENTIAL MANAGEMENT
-# =====================================================================
-priv_path, pub_path, token_path = "bob.priv", "bob.pub", "bob.token"
-
-if not os.path.exists(priv_path):
-    priv = x25519.X25519PrivateKey.generate()
-    pub  = priv.public_key()
-    tok  = secrets.token_hex(16)
-
-    priv_bytes = priv.private_bytes(Encoding.Raw, PrivateFormat.Raw, NoEncryption())
-    pub_bytes  = pub.public_bytes(Encoding.Raw, PublicFormat.Raw)
-
-    open(priv_path,  "wb").write(priv_bytes)
-    open(pub_path,   "wb").write(pub_bytes)
-    open(token_path, "w" ).write(tok)
-
-    try:
-        requests.post(
-            f"{SERVER_URL}/register/{tok}",
-            json={"public_key_hex": pub_bytes.hex()},
-            timeout=3,
-        )
-    except Exception:
-        pass
-else:
-    priv_bytes = open(priv_path,  "rb").read()
-    pub_bytes  = open(pub_path,   "rb").read()
-    tok        = open(token_path, "r" ).read().strip()
-
-    priv = x25519.X25519PrivateKey.from_private_bytes(priv_bytes)
-    pub  = x25519.X25519PublicKey.from_public_bytes(pub_bytes)
-
-# Always force token registration on backend load
-# Always force token registration on backend load
-try:
-    requests.post(
-        f"{SERVER_URL}/register/{tok}",
-        json={"public_key_hex": pub_bytes.hex()},
-        timeout=3,
-    )
-except Exception:
-    pass
-
-my_safety = generate_safety_number(pub_bytes)
-
-# =====================================================================
 # 🌐 INVITE LINK AUTO-FILL (?add=<token>)
 # =====================================================================
 params          = st.query_params
@@ -500,9 +439,6 @@ st.markdown(f"""
   </div>
 </div>
 """, unsafe_allow_html=True)
-# Application Header
-st.markdown("<h2 style='margin-bottom:0px;'>GHOST CHANNEL</h2>", unsafe_allow_html=True)
-st.markdown("<p style='color:#71717A;font-family:\"JetBrains Mono\",monospace;font-size:12px;margin-bottom:24px;'>Zero-knowledge steganographic messenger</p>", unsafe_allow_html=True)
 
 tab_send, tab_recv, tab_id = st.tabs(["SEND", "RECEIVE", "IDENTITY"])
 
@@ -610,14 +546,14 @@ with tab_recv:
         with st.spinner("Querying node & filtering network chaff..."):
             try:
                 packages = requests.get(
-                    f"{SERVER_URL}/poll/{tok}", timeout=10
+                    f"{SERVER_URL}/poll/{user_token}", timeout=10
                 ).json().get("payloads", [])
 
                 found = 0
                 for hex_data in packages:
                     raw = bytes.fromhex(hex_data)
                     try:
-                        extracted = robust_extract(raw, tok)
+                        extracted = robust_extract(raw, user_token)
                         st.session_state.inbox.append({
                             "raw_img"  : raw,
                             "extracted": extracted,
@@ -653,7 +589,7 @@ with tab_recv:
                         eph_pub_bytes = extracted[:32]
                         enc_msg       = extracted[32:]
                         eph_pub       = x25519.X25519PublicKey.from_public_bytes(eph_pub_bytes)
-                        shared        = priv.exchange(eph_pub)
+                        shared        = user_priv_key.exchange(eph_pub)
                         aes_key       = derive_aes_key(shared)
                         cleartext     = Fernet(aes_key).decrypt(enc_msg).decode()
                         st.session_state.inbox[i]["cleartext"] = cleartext
@@ -685,17 +621,20 @@ with tab_recv:
 # TAB: IDENTITY
 # ─────────────────────────────────────────────
 with tab_id:
+    # Dynamically compute the safety number based strictly on the session state memory
+    my_safety = generate_safety_number(user_pub_bytes)
+
     col_qr, col_info = st.columns([1, 1.4])
 
     with col_qr:
         st.markdown("<div class='step-label'>QR DISCOVERY</div>", unsafe_allow_html=True)
-        st.markdown(qr_for_token(tok, APP_URL), unsafe_allow_html=True)
+        st.markdown(qr_for_token(user_token, APP_URL), unsafe_allow_html=True)
 
     with col_info:
         st.markdown("<div class='step-label'>YOUR DELIVERY TOKEN</div>", unsafe_allow_html=True)
-        st.code(tok, language=None)
+        st.code(user_token, language=None)
 
-        invite_link = f"{APP_URL}/?add={tok}"
+        invite_link = f"{APP_URL}/?add={user_token}"
         st.markdown("<div class='step-label' style='margin-top:10px;'>DEEP INVITE LINK</div>", unsafe_allow_html=True)
         st.code(invite_link, language=None)
 
