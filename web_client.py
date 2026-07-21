@@ -448,6 +448,38 @@ hr { border-color: #1C1C2A !important; margin: 1.6rem 0 !important; }
 # =====================================================================
 # 👻  PIXEL ART ASSETS
 # =====================================================================
+
+# GREETING ghost — sleeping (zzz), shown in header on load
+GHOST_GREET_SVG = """<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 22 22" shape-rendering="crispEdges">
+  <!-- dome -->
+  <rect x="6"  y="1"  width="10" height="1" fill="#EDE9FE"/>
+  <rect x="4"  y="2"  width="14" height="1" fill="#EDE9FE"/>
+  <rect x="3"  y="3"  width="16" height="1" fill="#EDE9FE"/>
+  <rect x="2"  y="4"  width="18" height="10" fill="#EDE9FE"/>
+  <!-- body -->
+  <rect x="2"  y="14" width="18" height="3"  fill="#EDE9FE"/>
+  <!-- wavy bottom -->
+  <rect x="2"  y="17" width="4"  height="2"  fill="#EDE9FE"/>
+  <rect x="9"  y="17" width="4"  height="2"  fill="#EDE9FE"/>
+  <rect x="16" y="17" width="4"  height="2"  fill="#EDE9FE"/>
+  <!-- closed sleepy eyes — curved downward arcs -->
+  <rect x="5"  y="9"  width="4"  height="1"  fill="#4C1D95"/>
+  <rect x="6"  y="10" width="2"  height="1"  fill="#4C1D95"/>
+  <rect x="13" y="9"  width="4"  height="1"  fill="#4C1D95"/>
+  <rect x="14" y="10" width="2"  height="1"  fill="#4C1D95"/>
+  <!-- blush -->
+  <rect x="4"  y="11" width="3"  height="1"  fill="#F9A8D4"/>
+  <rect x="15" y="11" width="3"  height="1"  fill="#F9A8D4"/>
+  <!-- zzz letters -->
+  <rect x="14" y="1"  width="4"  height="1"  fill="#C4B5FD"/>
+  <rect x="17" y="2"  width="1"  height="1"  fill="#C4B5FD"/>
+  <rect x="14" y="3"  width="4"  height="1"  fill="#C4B5FD"/>
+  <rect x="16" y="4"  width="3"  height="1"  fill="#A78BFA"/>
+  <rect x="18" y="5"  width="1"  height="1"  fill="#A78BFA"/>
+  <rect x="16" y="6"  width="3"  height="1"  fill="#A78BFA"/>
+</svg>"""
+
+# IDLE ghost — normal calm ghost shown in header after greeting
 GHOST_SVG = """<svg xmlns="http://www.w3.org/2000/svg" width="54" height="54" viewBox="0 0 20 20" shape-rendering="crispEdges">
   <rect x="6" y="2"  width="8"  height="1" fill="#F3E8FF"/>
   <rect x="4" y="3"  width="12" height="1" fill="#F3E8FF"/>
@@ -463,20 +495,53 @@ GHOST_SVG = """<svg xmlns="http://www.w3.org/2000/svg" width="54" height="54" vi
   <rect x="14" y="10" width="2" height="1" fill="#F472B6"/>
 </svg>"""
 
-GHOST_WIN_SVG = """<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 20 20" shape-rendering="crispEdges">
-  <rect x="6" y="2"  width="8"  height="1" fill="#A855F7"/>
-  <rect x="4" y="3"  width="12" height="1" fill="#A855F7"/>
-  <rect x="3" y="4"  width="14" height="2" fill="#A855F7"/>
-  <rect x="2" y="6"  width="16" height="8" fill="#A855F7"/>
-  <rect x="2" y="14" width="3"  height="2" fill="#A855F7"/>
-  <rect x="6" y="14" width="3"  height="2" fill="#A855F7"/>
-  <rect x="11" y="14" width="3" height="2" fill="#A855F7"/>
-  <rect x="15" y="14" width="3" height="2" fill="#A855F7"/>
-  <rect x="5" y="7"  width="2"  height="3" fill="#1E1B4B"/>
-  <rect x="13" y="7" width="2"  height="3" fill="#1E1B4B"/>
-  <rect x="7" y="9"  width="6"  height="2" fill="#1E1B4B"/>
-  <rect x="18" y="8" width="2"  height="3" fill="#A855F7"/>
-  <rect x="20" y="6" width="2"  height="3" fill="#A855F7"/>
+# ANGRY ghost — shown on offline / token expired errors
+GHOST_ANGRY_SVG = """<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 20 20" shape-rendering="crispEdges">
+  <!-- dome -->
+  <rect x="6" y="2"  width="8"  height="1" fill="#EDE9FE"/>
+  <rect x="4" y="3"  width="12" height="1" fill="#EDE9FE"/>
+  <rect x="3" y="4"  width="14" height="2" fill="#EDE9FE"/>
+  <rect x="2" y="6"  width="16" height="8" fill="#EDE9FE"/>
+  <!-- wavy bottom -->
+  <rect x="2"  y="14" width="3"  height="2" fill="#EDE9FE"/>
+  <rect x="7"  y="14" width="3"  height="2" fill="#EDE9FE"/>
+  <rect x="12" y="14" width="3"  height="2" fill="#EDE9FE"/>
+  <rect x="17" y="14" width="1"  height="2" fill="#EDE9FE"/>
+  <!-- angry squint eyes — zigzag > < shape -->
+  <!-- left eye > -->
+  <rect x="4"  y="7"  width="1"  height="1" fill="#4C1D95"/>
+  <rect x="5"  y="8"  width="2"  height="1" fill="#4C1D95"/>
+  <rect x="4"  y="9"  width="1"  height="1" fill="#4C1D95"/>
+  <!-- right eye < -->
+  <rect x="13" y="7"  width="1"  height="1" fill="#4C1D95"/>
+  <rect x="11" y="8"  width="2"  height="1" fill="#4C1D95"/>
+  <rect x="13" y="9"  width="1"  height="1" fill="#4C1D95"/>
+  <!-- blush -->
+  <rect x="3"  y="11" width="3"  height="1" fill="#F9A8D4"/>
+  <rect x="14" y="11" width="3"  height="1" fill="#F9A8D4"/>
+</svg>"""
+
+GHOST_WIN_SVG = """<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 22 22" shape-rendering="crispEdges">
+  <!-- rounded top dome -->
+  <rect x="6"  y="1"  width="10" height="1" fill="#A855F7"/>
+  <rect x="4"  y="2"  width="14" height="1" fill="#A855F7"/>
+  <rect x="3"  y="3"  width="16" height="1" fill="#A855F7"/>
+  <rect x="2"  y="4"  width="18" height="1" fill="#A855F7"/>
+  <!-- body -->
+  <rect x="2"  y="5"  width="18" height="10" fill="#A855F7"/>
+  <!-- wavy bottom: 3 bumps (teeth) -->
+  <rect x="2"  y="15" width="4"  height="2" fill="#A855F7"/>
+  <rect x="9"  y="15" width="4"  height="2" fill="#A855F7"/>
+  <rect x="16" y="15" width="4"  height="2" fill="#A855F7"/>
+  <rect x="2"  y="17" width="3"  height="1" fill="#A855F7"/>
+  <rect x="9"  y="17" width="4"  height="1" fill="#A855F7"/>
+  <rect x="16" y="17" width="4"  height="1" fill="#A855F7"/>
+  <!-- eyes (white) -->
+  <rect x="6"  y="7"  width="3"  height="3" fill="#ffffff"/>
+  <rect x="13" y="7"  width="3"  height="3" fill="#ffffff"/>
+  <!-- pupils (dark) -->
+  <rect x="7"  y="8"  width="2"  height="2" fill="#1E1B4B"/>
+  <rect x="14" y="8"  width="2"  height="2" fill="#1E1B4B"/>
 </svg>"""
 
 PLANE_SVG = """<svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 20 20" shape-rendering="crispEdges">
@@ -491,15 +556,24 @@ PLANE_SVG = """<svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" vi
 # =====================================================================
 # 🏠  HEADER
 # =====================================================================
+# First visit → greeting ghost + welcome text. After that → idle ghost.
+if "greeted" not in st.session_state:
+    st.session_state["greeted"] = True
+    header_ghost   = GHOST_GREET_SVG
+    header_sub     = "shh… your secrets are safe here"
+else:
+    header_ghost   = GHOST_SVG
+    header_sub     = "STEGANOGRAPHIC · E2E ENCRYPTED · ZERO IDENTITY"
+
 st.markdown(f"""
 <div style="display:flex;align-items:center;gap:14px;padding:2rem 0 1.6rem;">
-  {GHOST_SVG}
+  {header_ghost}
   <div>
     <div style="font-family:'Inter',sans-serif;font-size:20px;font-weight:800;
                 color:#fff;letter-spacing:-.02em;">GHOST CHANNEL</div>
-    <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#3F3F46;
+    <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#52525B;
                 letter-spacing:.1em;margin-top:3px;">
-      STEGANOGRAPHIC · E2E ENCRYPTED · ZERO IDENTITY
+      {header_sub}
     </div>
   </div>
 </div>
@@ -638,13 +712,14 @@ with tab_send:
 
         except Exception:
             st.markdown(
-                "<div style='background:rgba(239,68,68,.08);border:1px solid #7F1D1D;"
-                "border-radius:10px;padding:14px 16px;font-family:\"JetBrains Mono\",monospace;'>"
-                "<div style='font-size:13px;color:#EF4444;font-weight:700;margin-bottom:4px;'>"
-                "Token Expired</div>"
-                "<div style='font-size:12px;color:#7F1D1D;'>"
-                "This token is no longer valid. Ask the recipient for a fresh one.</div>"
-                "</div>",
+                f"<div style='background:rgba(239,68,68,.06);border:1px solid #7F1D1D;"
+                f"border-radius:12px;padding:16px;display:flex;align-items:center;gap:14px;'>"
+                f"{GHOST_ANGRY_SVG}"
+                f"<div><div style='font-size:13px;color:#EF4444;font-weight:700;"
+                f"font-family:\"JetBrains Mono\",monospace;margin-bottom:4px;'>Token Expired</div>"
+                f"<div style='font-size:12px;color:#7F1D1D;font-family:\"JetBrains Mono\",monospace;'>"
+                f"This token is no longer valid.<br>Ask the recipient for a fresh one.</div></div>"
+                f"</div>",
                 unsafe_allow_html=True,
             )
 
@@ -684,9 +759,14 @@ with tab_recv:
 
             except Exception as e:
                 st.markdown(
-                    f"<div style='background:rgba(239,68,68,.08);border:1px solid #7F1D1D;"
-                    f"border-radius:10px;padding:12px 14px;font-size:12px;color:#FCA5A5;"
-                    f"font-family:\"JetBrains Mono\",monospace;'>✗ network error: {e}</div>",
+                    f"<div style='background:rgba(239,68,68,.06);border:1px solid #7F1D1D;"
+                    f"border-radius:12px;padding:16px;display:flex;align-items:center;gap:14px;'>"
+                    f"{GHOST_ANGRY_SVG}"
+                    f"<div><div style='font-size:13px;color:#EF4444;font-weight:700;"
+                    f"font-family:\"JetBrains Mono\",monospace;margin-bottom:4px;'>Server Offline</div>"
+                    f"<div style='font-size:12px;color:#7F1D1D;font-family:\"JetBrains Mono\",monospace;'>"
+                    f"Could not reach the relay node.<br>Check your connection and try again.</div></div>"
+                    f"</div>",
                     unsafe_allow_html=True,
                 )
 
