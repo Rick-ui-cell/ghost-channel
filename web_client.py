@@ -26,7 +26,7 @@ rs           = RSCodec(100)
 st.set_page_config(page_title="Ghost Channel", page_icon="👻", layout="centered")
 
 # =====================================================================
-# 🔑  SESSION-ISOLATED IDENTITY
+# 🔑  SESSION-ISOLATED IDENTITY & STATE
 # =====================================================================
 if "private_key" not in st.session_state or "token" not in st.session_state:
     priv_key  = x25519.X25519PrivateKey.generate()
@@ -45,6 +45,9 @@ if "private_key" not in st.session_state or "token" not in st.session_state:
 user_token    = st.session_state["token"]
 user_priv_key = st.session_state["private_key"]
 user_pub_bytes= st.session_state["pub_bytes"]
+
+if "form_key" not in st.session_state:
+    st.session_state["form_key"] = 0
 
 # =====================================================================
 # 🔐  CRYPTO
@@ -218,6 +221,11 @@ st.markdown("""
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+html {
+  /* Enables smooth scrolling when the ghost is clicked */
+  scroll-behavior: smooth !important;
+}
+
 html, body,
 [data-testid="stAppViewContainer"],
 [data-testid="stApp"] {
@@ -229,6 +237,65 @@ html, body,
 [data-testid="stHeader"]  { background: transparent !important; border: none !important; }
 [data-testid="stSidebar"] { display: none !important; }
 .block-container          { max-width: 680px !important; padding: 0 1.25rem 4rem !important; }
+
+/* ── GHOST CLICK ANIMATION ── */
+.ghost-link {
+  transition: transform 0.2s ease, filter 0.2s ease;
+  cursor: pointer;
+}
+.ghost-link:hover {
+  transform: translateY(-2px) scale(1.02);
+  filter: drop-shadow(0 4px 12px rgba(168,85,247,0.3));
+}
+
+/* ── PIXEL SPEECH BUBBLE (FLOATING LEFT OF GHOST) ── */
+.pixel-bubble-left {
+  position: absolute;
+  right: calc(100% + 12px); 
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  background: #F3E8FF;
+  color: #1E1B4B;
+  padding: 6px 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: 
+    -2px 0 0 0 #1E1B4B,
+    2px 0 0 0 #1E1B4B,
+    0 -2px 0 0 #1E1B4B,
+    0 2px 0 0 #1E1B4B;
+  z-index: 10;
+}
+.pixel-bubble-left::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -6px; 
+  transform: translateY(-50%);
+  width: 4px;
+  height: 4px;
+  background: #F3E8FF;
+  box-shadow: 
+    2px 0 0 0 #1E1B4B,
+    0 -2px 0 0 #1E1B4B,
+    0 2px 0 0 #1E1B4B;
+  z-index: 2;
+}
+.pixel-bubble-left::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -2px; 
+  transform: translateY(-50%);
+  width: 2px;
+  height: 4px;
+  background: #F3E8FF;
+  z-index: 3;
+}
 
 /* ── TABS ── */
 .stTabs [data-baseweb="tab-list"] {
@@ -341,49 +408,7 @@ html, body,
 }
 [data-testid="stCheckbox"] svg { color: #A855F7 !important; }
 
-/* ── CODE / TOKENS ── */
-[data-testid="stCodeBlock"] pre {
-  background: #0E0E16 !important;
-  border: 1px solid #1C1C2A !important;
-  border-radius: 10px !important;
-  color: #C084FC !important;
-  font-family: 'JetBrains Mono', monospace !important;
-  font-size: 12px !important;
-}
-
-/* ── ALERTS ── */
-[data-testid="stAlert"] {
-  border-radius: 10px !important;
-  font-family: 'Inter', sans-serif !important;
-  font-size: 13px !important;
-}
-
-/* ── IMAGES ── */
-[data-testid="stImage"] img {
-  border-radius: 14px !important;
-  border: 1px solid #1C1C2A !important;
-}
-
-/* ── TOAST ── */
-[data-testid="stToast"] {
-  background: #0E0E16 !important;
-  border: 1px solid #2A1F3D !important;
-  color: #C084FC !important;
-  border-radius: 10px !important;
-  font-family: 'Inter', sans-serif !important;
-  font-size: 13px !important;
-}
-
-/* ── DIVIDER ── */
-hr { border-color: #1C1C2A !important; margin: 1.6rem 0 !important; }
-
-/* ── SCROLLBAR ── */
-::-webkit-scrollbar            { width: 4px; }
-::-webkit-scrollbar-track      { background: #08080F; }
-::-webkit-scrollbar-thumb      { background: #2A1F3D; border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover{ background: #A855F7; }
-
-/* ── CUSTOM COMPONENTS ── */
+/* ── ALERTS / CARDS / COMPONENTS ── */
 .gc-label {
   font-family: 'JetBrains Mono', monospace;
   font-size: 10px;
@@ -400,14 +425,7 @@ hr { border-color: #1C1C2A !important; margin: 1.6rem 0 !important; }
   padding: 20px;
   margin-bottom: 16px;
 }
-.gc-pill {
-  display: inline-block;
-  padding: 3px 10px;
-  border-radius: 99px;
-  font-size: 11px;
-  font-family: 'JetBrains Mono', monospace;
-  font-weight: 500;
-}
+hr { border-color: #1C1C2A !important; margin: 1.6rem 0 !important; }
 
 /* ── ANIMATIONS ── */
 @keyframes flyAway {
@@ -418,10 +436,6 @@ hr { border-color: #1C1C2A !important; margin: 1.6rem 0 !important; }
 @keyframes fadeSlideIn {
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0);   }
-}
-@keyframes pulse-dot {
-  0%,100% { box-shadow: 0 0 0 0 rgba(168,85,247,.6); }
-  50%      { box-shadow: 0 0 0 6px rgba(168,85,247,0); }
 }
 .plane-anim {
   animation: flyAway 1.4s cubic-bezier(.4,0,.2,1) forwards;
@@ -436,21 +450,19 @@ hr { border-color: #1C1C2A !important; margin: 1.6rem 0 !important; }
   display: flex; flex-direction: column; align-items: center; gap: 10px;
   text-align: center;
 }
-.pulse-dot {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: #A855F7;
-  animation: pulse-dot 2s ease infinite;
-  display: inline-block;
-}
 </style>
 """, unsafe_allow_html=True)
 
+
 # =====================================================================
-# 👻  PIXEL ART ASSETS
+# 👻  DYNAMIC PIXEL ART ASSETS
 # =====================================================================
 
-# IDLE ghost — normal calm ghost shown in header
-GHOST_SVG = """<svg xmlns="http://www.w3.org/2000/svg" width="54" height="54" viewBox="0 0 20 20" shape-rendering="crispEdges">
+def get_ghost_header_assets(state="normal"):
+    """
+    Generates dynamic SVG face features and header text based on user state.
+    """
+    base_body = """<svg xmlns="http://www.w3.org/2000/svg" width="54" height="54" viewBox="0 0 20 20" shape-rendering="crispEdges">
   <rect x="6" y="2"  width="8"  height="1" fill="#F3E8FF"/>
   <rect x="4" y="3"  width="12" height="1" fill="#F3E8FF"/>
   <rect x="3" y="4"  width="14" height="2" fill="#F3E8FF"/>
@@ -459,39 +471,92 @@ GHOST_SVG = """<svg xmlns="http://www.w3.org/2000/svg" width="54" height="54" vi
   <rect x="6" y="14" width="3"  height="2" fill="#F3E8FF"/>
   <rect x="11" y="14" width="3" height="2" fill="#F3E8FF"/>
   <rect x="15" y="14" width="3" height="2" fill="#F3E8FF"/>
-  <rect x="5" y="7"  width="2"  height="3" fill="#1E1B4B"/>
-  <rect x="13" y="7" width="2"  height="3" fill="#1E1B4B"/>
-  <rect x="4" y="10" width="2"  height="1" fill="#F472B6"/>
-  <rect x="14" y="10" width="2" height="1" fill="#F472B6"/>
+{face_elements}
 </svg>"""
 
-# ANGRY ghost — shown on offline / token expired errors
+    if state == "imageLoaded":
+        face_elements = (
+            '<rect x="4" y="7" width="1" height="1" fill="#1E1B4B"/>\n'
+            '<rect x="5" y="8" width="2" height="1" fill="#1E1B4B"/>\n'
+            '<rect x="4" y="9" width="1" height="1" fill="#1E1B4B"/>\n'
+            '<rect x="15" y="7" width="1" height="1" fill="#1E1B4B"/>\n'
+            '<rect x="13" y="8" width="2" height="1" fill="#1E1B4B"/>\n'
+            '<rect x="15" y="9" width="1" height="1" fill="#1E1B4B"/>\n'
+            '<rect x="4" y="10" width="2" height="1" fill="#F472B6"/>\n'
+            '<rect x="14" y="10" width="2" height="1" fill="#F472B6"/>'
+        )
+        subtext = "Image is ready for secret Text embedding"
+
+    elif state == "typing":
+        face_elements = (
+            '<rect x="4" y="7" width="3" height="1" fill="#1E1B4B"/>\n'
+            '<rect x="6" y="8" width="1" height="2" fill="#1E1B4B"/>\n'
+            '<rect x="12" y="7" width="3" height="1" fill="#1E1B4B"/>\n'
+            '<rect x="14" y="8" width="1" height="2" fill="#1E1B4B"/>\n'
+            '<rect x="4" y="10" width="2" height="1" fill="#F472B6"/>\n'
+            '<rect x="14" y="10" width="2" height="1" fill="#F472B6"/>'
+        )
+        subtext = "Im not looking at all !!"
+
+    elif state == "decrypted":
+        face_elements = (
+            '<rect x="4" y="7" width="1" height="1" fill="#1E1B4B"/>\n'
+            '<rect x="5" y="6" width="1" height="1" fill="#1E1B4B"/>\n'
+            '<rect x="6" y="7" width="1" height="1" fill="#1E1B4B"/>\n'
+            '<rect x="12" y="7" width="1" height="1" fill="#1E1B4B"/>\n'
+            '<rect x="13" y="6" width="1" height="1" fill="#1E1B4B"/>\n'
+            '<rect x="14" y="7" width="1" height="1" fill="#1E1B4B"/>\n'
+            '<rect x="4" y="9" width="2" height="1" fill="#F472B6"/>\n'
+            '<rect x="14" y="9" width="2" height="1" fill="#F472B6"/>'
+        )
+        subtext = "Secret message revealed!"
+        
+    elif state == "error":
+        # New angry token error face
+        face_elements = (
+            '<rect x="4" y="7" width="1" height="1" fill="#4C1D95"/>\n'
+            '<rect x="5" y="8" width="2" height="1" fill="#4C1D95"/>\n'
+            '<rect x="4" y="9" width="1" height="1" fill="#4C1D95"/>\n'
+            '<rect x="15" y="7" width="1" height="1" fill="#4C1D95"/>\n'
+            '<rect x="13" y="8" width="2" height="1" fill="#4C1D95"/>\n'
+            '<rect x="15" y="9" width="1" height="1" fill="#4C1D95"/>\n'
+            '<rect x="4" y="10" width="2" height="1" fill="#F472B6"/>\n'
+            '<rect x="14" y="10" width="2" height="1" fill="#F472B6"/>'
+        )
+        subtext = "Token Error!"
+
+    else:
+        # Default/Normal state 
+        face_elements = (
+            '<rect x="5" y="7" width="2" height="3" fill="#1E1B4B"/>\n'
+            '<rect x="13" y="7" width="2" height="3" fill="#1E1B4B"/>\n'
+            '<rect x="4" y="10" width="2" height="1" fill="#F472B6"/>\n'
+            '<rect x="14" y="10" width="2" height="1" fill="#F472B6"/>'
+        )
+        subtext = "Need help ? click me!"
+
+    svg_code = base_body.format(face_elements=face_elements)
+    return svg_code, subtext
+
 GHOST_ANGRY_SVG = """<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 20 20" shape-rendering="crispEdges">
-  <!-- dome -->
   <rect x="6" y="2"  width="8"  height="1" fill="#EDE9FE"/>
   <rect x="4" y="3"  width="12" height="1" fill="#EDE9FE"/>
   <rect x="3" y="4"  width="14" height="2" fill="#EDE9FE"/>
   <rect x="2" y="6"  width="16" height="8" fill="#EDE9FE"/>
-  <!-- wavy bottom -->
   <rect x="2"  y="14" width="3"  height="2" fill="#EDE9FE"/>
   <rect x="7"  y="14" width="3"  height="2" fill="#EDE9FE"/>
   <rect x="12" y="14" width="3"  height="2" fill="#EDE9FE"/>
   <rect x="17" y="14" width="1"  height="2" fill="#EDE9FE"/>
-  <!-- angry squint eyes — zigzag > < shape -->
-  <!-- left eye > -->
   <rect x="4"  y="7"  width="1"  height="1" fill="#4C1D95"/>
   <rect x="5"  y="8"  width="2"  height="1" fill="#4C1D95"/>
   <rect x="4"  y="9"  width="1"  height="1" fill="#4C1D95"/>
-  <!-- right eye < -->
   <rect x="13" y="7"  width="1"  height="1" fill="#4C1D95"/>
   <rect x="11" y="8"  width="2"  height="1" fill="#4C1D95"/>
   <rect x="13" y="9"  width="1"  height="1" fill="#4C1D95"/>
-  <!-- blush -->
   <rect x="3"  y="11" width="3"  height="1" fill="#F9A8D4"/>
   <rect x="14" y="11" width="3"  height="1" fill="#F9A8D4"/>
 </svg>"""
 
-# THUMBS-UP ghost — shown after successfully sending a message
 GHOST_THUMBS_UP_SVG = """<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 20" shape-rendering="crispEdges">
   <rect x="6" y="2" width="8" height="1" fill="#A855F7"/>
   <rect x="4" y="3" width="12" height="1" fill="#A855F7"/>
@@ -503,7 +568,6 @@ GHOST_THUMBS_UP_SVG = """<svg xmlns="http://www.w3.org/2000/svg" width="100" hei
   <rect x="15" y="14" width="3" height="2" fill="#A855F7"/>
   <rect x="5" y="7" width="2" height="3" fill="#1E1B4B"/>
   <rect x="13" y="7" width="2" height="3" fill="#1E1B4B"/>
-  <!-- Thumbs up arm -->
   <rect x="18" y="9" width="3" height="2" fill="#A855F7"/>
   <rect x="20" y="7" width="2" height="2" fill="#A855F7"/>
 </svg>"""
@@ -518,26 +582,28 @@ PLANE_SVG = """<svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" vi
 </svg>"""
 
 # =====================================================================
-# 🏠  HEADER
+# 🏠  HEADER PLACEHOLDER (Drawn dynamically at the bottom)
 # =====================================================================
-header_ghost   = GHOST_SVG
-header_sub     = "STEGANOGRAPHIC · E2E ENCRYPTED · ZERO IDENTITY"
+header_placeholder = st.empty()
 
-st.markdown(f"""
-<div style="display:flex;align-items:center;gap:14px;padding:2rem 0 1.6rem;">
-  {header_ghost}
-  <div>
-    <div style="font-family:'Inter',sans-serif;font-size:20px;font-weight:800;
-                color:#fff;letter-spacing:-.02em;">GHOST CHANNEL</div>
-    <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#52525B;
-                letter-spacing:.1em;margin-top:3px;">
-      {header_sub}
-    </div>
-  </div>
-</div>
-<div style="height:1px;background:linear-gradient(90deg,#2A1F3D,transparent);margin-bottom:1.6rem;"></div>
-""", unsafe_allow_html=True)
+form_key = st.session_state["form_key"]
+has_cover_image = bool(st.session_state.get(f"cover_file_{form_key}"))
+has_secret_text = bool(st.session_state.get(f"secret_msg_{form_key}", "").strip())
 
+# Determine initial base state before checking for errors below
+if st.session_state.get("just_decrypted"):
+    ghost_state = "decrypted"
+    st.session_state["just_decrypted"] = False  
+elif has_secret_text:
+    ghost_state = "typing"
+elif has_cover_image:
+    ghost_state = "imageLoaded"
+else:
+    ghost_state = "normal"
+
+# =====================================================================
+# 🗂️  MAIN TABS
+# =====================================================================
 tab_send, tab_recv, tab_id = st.tabs(["↑  SEND", "↓  RECEIVE", "◎  IDENTITY"])
 
 # =====================================================================
@@ -568,6 +634,7 @@ with tab_send:
     )
 
     if target and len(target) != 32:
+        ghost_state = "error" # Override header state
         st.markdown(
             "<div style='font-size:12px;color:#EF4444;font-family:\"JetBrains Mono\",monospace;"
             "margin-top:4px;'>⚠ token must be exactly 32 characters</div>",
@@ -618,6 +685,7 @@ with tab_send:
                     "cover image",
                     type=["png","jpg","jpeg"],
                     label_visibility="collapsed",
+                    key=f"cover_file_{form_key}"
                 )
                 st.markdown(
                     "<div style='font-size:10px;color:#52525B;font-family:\"JetBrains Mono\",monospace;"
@@ -627,6 +695,7 @@ with tab_send:
                 secret_message = st.text_area(
                     "msg", placeholder="only the recipient will ever read this…",
                     height=100, label_visibility="collapsed",
+                    key=f"secret_msg_{form_key}"
                 )
 
                 if cover_file:
@@ -638,9 +707,21 @@ with tab_send:
                 send_ok = bool(cover_file and secret_message and secret_message.strip())
                 anim_slot = st.empty()
 
+                if st.session_state.get("payload_sent"):
+                    anim_slot.markdown(
+                        f"<div class='success-anim'>{GHOST_THUMBS_UP_SVG}"
+                        f"<span style='font-family:\"JetBrains Mono\",monospace;"
+                        f"font-size:13px;font-weight:700;color:#C084FC;'>"
+                        f"PAYLOAD TRANSMITTED</span>"
+                        f"<span style='font-size:12px;color:#52525B;font-family:\"Inter\",sans-serif;'>"
+                        f"recipient sees only a photo — until they decrypt</span></div>",
+                        unsafe_allow_html=True,
+                    )
+                    st.session_state["payload_sent"] = False  
+
                 if st.button("↑ hide & transmit", type="primary",
                              use_container_width=True, disabled=not send_ok):
-                    # fly animation
+                    
                     anim_slot.markdown(
                         f"<div class='plane-anim'>{PLANE_SVG}</div>",
                         unsafe_allow_html=True,
@@ -658,17 +739,13 @@ with tab_send:
                             files={"file": ("payload.png", stego_buf, "image/png")},
                             timeout=10,
                         )
-                    anim_slot.markdown(
-                        f"<div class='success-anim'>{GHOST_THUMBS_UP_SVG}"
-                        f"<span style='font-family:\"JetBrains Mono\",monospace;"
-                        f"font-size:13px;font-weight:700;color:#C084FC;'>"
-                        f"PAYLOAD TRANSMITTED</span>"
-                        f"<span style='font-size:12px;color:#52525B;font-family:\"Inter\",sans-serif;'>"
-                        f"recipient sees only a photo — until they decrypt</span></div>",
-                        unsafe_allow_html=True,
-                    )
+                    
+                    st.session_state["payload_sent"] = True
+                    st.session_state["form_key"] += 1
+                    st.rerun()
 
         except Exception:
+            ghost_state = "error" # Override header state
             st.markdown(
                 f"<div style='background:rgba(239,68,68,.06);border:1px solid #7F1D1D;"
                 f"border-radius:12px;padding:16px;display:flex;align-items:center;gap:14px;'>"
@@ -716,6 +793,7 @@ with tab_recv:
                     st.toast(f"{found} new payload(s) arrived", icon="📩")
 
             except Exception as e:
+                ghost_state = "error" # Override header state
                 st.markdown(
                     f"<div style='background:rgba(239,68,68,.06);border:1px solid #7F1D1D;"
                     f"border-radius:12px;padding:16px;display:flex;align-items:center;gap:14px;'>"
@@ -737,7 +815,6 @@ with tab_recv:
 
         for i, item in enumerate(st.session_state.inbox):
 
-            # Card header — no pills, just message number
             st.markdown(
                 f"<div class='gc-card'>"
                 f"<div style='margin-bottom:14px;'>"
@@ -747,7 +824,6 @@ with tab_recv:
                 unsafe_allow_html=True,
             )
 
-            # Cover image — always shown
             st.image(item["raw_img"], use_container_width=True)
 
             st.markdown("<div style='height:12px;'></div>", unsafe_allow_html=True)
@@ -763,6 +839,7 @@ with tab_recv:
                             aes_key   = derive_aes_key(shared)
                             cleartext = Fernet(aes_key).decrypt(ext[32:]).decode()
                             st.session_state.inbox[i]["cleartext"] = cleartext
+                            st.session_state["just_decrypted"] = True  
                             st.toast("message decrypted!", icon="🔓")
                             st.rerun()
                         except Exception:
@@ -801,7 +878,7 @@ with tab_recv:
                     unsafe_allow_html=True,
                 )
 
-            st.markdown("</div>", unsafe_allow_html=True)  # close gc-card
+            st.markdown("</div>", unsafe_allow_html=True) 
 
 # =====================================================================
 # TAB — IDENTITY
@@ -880,3 +957,60 @@ with tab_id:
         "or find out who you are.</div>",
         unsafe_allow_html=True,
     )
+
+
+# =====================================================================
+# 🏠  RENDER HEADER (Evaluated after all logic to ensure correct state)
+# =====================================================================
+with header_placeholder.container():
+    header_ghost, header_sub = get_ghost_header_assets(ghost_state)
+    st.markdown(f"""
+<div style="display:flex;align-items:center;padding:2rem 0 1.6rem;">
+<div style="display:flex;align-items:center;gap:14px;">
+<a href="#help-section" class="ghost-link" style="position:relative;display:inline-flex;align-items:center;text-decoration:none;color:inherit;">
+<div class="pixel-bubble-left">
+{header_sub}
+</div>
+{header_ghost}
+</a>
+<div>
+<div style="font-family:'Inter',sans-serif;font-size:20px;font-weight:900;color:#fff;letter-spacing:-.02em;">GHOST CHANNEL</div>
+<div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#52525B;letter-spacing:.1em;margin-top:3px;">STEGANOGRAPHIC · E2E ENCRYPTED · ZERO IDENTITY</div>
+</div>
+</div>
+</div>
+<div style="height:1px;background:linear-gradient(90deg,#2A1F3D,transparent);margin-bottom:1.6rem;"></div>
+""", unsafe_allow_html=True)
+
+
+# =====================================================================
+# HELP & ABOUT SECTION (ANCHORED AT BOTTOM)
+# =====================================================================
+st.markdown("""
+<div id="help-section" style="margin-top:6rem; padding-top:4rem; border-top:1px solid #1C1C2A; font-family:'Inter', sans-serif; display:flex; gap:60px; flex-wrap:wrap; padding-bottom:4rem;">
+<div style="flex:1; min-width:280px;">
+<div style="font-family:'JetBrains Mono', monospace; font-size:10px; font-weight:600; color:#52525B; letter-spacing:.12em; text-transform:uppercase; margin-bottom:16px;">INSTRUCTIONS & WARNINGS</div>
+<div style="font-size:12px; color:#A1A1AA; line-height:1.8;">
+<span style="color:#EF4444; font-weight:600;">CRITICAL: DO NOT REFRESH</span><br>
+Refreshing your browser generates a brand new cryptographic identity. You will permanently lose your current delivery token, private key, and any unread messages.<br><br>
+<span style="color:#E4E4E7; font-weight:600;">1. The Cover Image</span><br>
+The app mathematically alters the invisible color pixels of an uploaded image to embed your secret text inside it.<br><br>
+<span style="color:#E4E4E7; font-weight:600;">2. Sending</span><br>
+Get the recipient's 32-character token. Paste the token, upload a photo, type your message, and transmit.<br><br>
+<span style="color:#E4E4E7; font-weight:600;">3. Receiving</span><br>
+Click check mailbox. If a disguised image appears, click decrypt to extract the hidden text using your private key.
+</div>
+</div>
+<div style="flex:1; min-width:280px;">
+<div style="font-family:'JetBrains Mono', monospace; font-size:10px; font-weight:600; color:#52525B; letter-spacing:.12em; text-transform:uppercase; margin-bottom:16px;">ABOUT GHOST CHANNEL</div>
+<div style="font-size:12px; color:#A1A1AA; line-height:1.8;">
+<span style="color:#E4E4E7; font-weight:600;">Zero Identity. Total Plausible Deniability.</span><br>
+An ultra-private, E2E encrypted message drop designed for environments where even the metadata of messaging is dangerous.<br><br>
+<span style="color:#E4E4E7; font-weight:600;">No Accounts</span><br>
+No emails, usernames, or phone numbers. Every session uses a disposable cryptographic identity.<br><br>
+<span style="color:#E4E4E7; font-weight:600;">Steganography & Chaffing</span><br>
+Ciphertexts are camouflaged in image pixels. The server cannot distinguish payloads from noise.
+</div>
+</div>
+</div>
+""", unsafe_allow_html=True)
